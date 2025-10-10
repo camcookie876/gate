@@ -1,10 +1,11 @@
 // camcookie-gate.js
-// Camcookie Gate Project – Full JS Implementation
+// Fully self-contained Camcookie Gate
 
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
+// --- Supabase Setup ---
 const SUPABASE_URL = "https://wewcufktohmyvfehdfsm.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indld2N1Zmt0b2hteXZmZWhkZnNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwODM0NjQsImV4cCI6MjA3NTY1OTQ2NH0.Pngy8H3Q2GFo2yi3KTfcJwbWepVtTjjhba13tle4C_Q"; // anon key with RLS enabled
+const SUPABASE_KEY = "YOUR_ANON_KEY_HERE"; // replace with your anon key
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // --- Config ---
@@ -22,7 +23,6 @@ const challenges = [
     ],
     correctHash: "SHA256_HASH_OF_CORRECT_INDICES"
   }
-  // Add more challenges here
 ];
 
 // --- Utility Functions ---
@@ -50,18 +50,24 @@ let streak = 0;
 let currentChallenge = 0;
 
 async function renderGate() {
-  const app = document.getElementById("app");
-  app.innerHTML = "";
+  document.body.innerHTML = ""; // clear page
+
+  const container = document.createElement("div");
+  container.style.fontFamily = "sans-serif";
+  container.style.textAlign = "center";
+  container.style.marginTop = "40px";
 
   const logo = document.createElement("img");
   logo.src = "https://your-logo-url.png";
   logo.style.maxWidth = "150px";
-  app.appendChild(logo);
+  container.appendChild(logo);
 
   const grid = document.createElement("div");
   grid.style.display = "grid";
   grid.style.gridTemplateColumns = "repeat(3, 100px)";
   grid.style.gap = "5px";
+  grid.style.justifyContent = "center";
+  grid.style.marginTop = "20px";
 
   const selected = new Set();
 
@@ -84,21 +90,21 @@ async function renderGate() {
     grid.appendChild(img);
   });
 
-  app.appendChild(grid);
+  container.appendChild(grid);
 
   const button = document.createElement("button");
   button.textContent = "Submit";
-  button.style.marginTop = "10px";
+  button.style.marginTop = "15px";
   button.style.padding = "8px 16px";
   button.style.background = "#007BFF";
   button.style.color = "#fff";
   button.style.border = "none";
   button.style.cursor = "pointer";
-  app.appendChild(button);
+  container.appendChild(button);
 
   const feedback = document.createElement("p");
   feedback.style.marginTop = "10px";
-  app.appendChild(feedback);
+  container.appendChild(feedback);
 
   button.addEventListener("click", async () => {
     const indices = Array.from(selected).sort().join(",");
@@ -118,6 +124,8 @@ async function renderGate() {
       feedback.textContent = "Incorrect. Try again.";
     }
   });
+
+  document.body.appendChild(container);
 }
 
 async function issueToken() {
@@ -152,18 +160,24 @@ async function validateToken() {
   return new Date(data.expires_at) > now;
 }
 
-async function showProtectedContent() {
-  document.getElementById("app").style.display = "none";
-  const protectedApp = document.getElementById("protected-app");
-  protectedApp.style.display = "block";
+function showProtectedContent() {
+  document.body.innerHTML = "";
+  const protectedDiv = document.createElement("div");
+  protectedDiv.style.textAlign = "center";
+  protectedDiv.style.marginTop = "50px";
+  protectedDiv.innerHTML = `
+    <h2>🎉 Protected Content</h2>
+    <p>This is only visible after passing the Camcookie Gate.</p>
+  `;
+  document.body.appendChild(protectedDiv);
 }
 
-// --- Init ---
-(async function init() {
+// --- Auto Init ---
+document.addEventListener("DOMContentLoaded", async () => {
   const valid = await validateToken();
   if (valid) {
     showProtectedContent();
   } else {
     renderGate();
   }
-})();
+});
