@@ -1,5 +1,4 @@
-// camcookie-gate.js
-// Fully self-contained Camcookie Gate
+// gate.js – Camcookie Gate with reCAPTCHA-style prompt
 
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
@@ -13,16 +12,24 @@ const STREAK_REQUIRED = 3;
 const TOKEN_EXPIRY_HOURS = 24;
 const COOKIE_NAME = "camcookie";
 
-// Example challenge data (replace with your own images + hashed answers)
+// --- Challenge Data ---
 const challenges = [
   {
+    prompt: "Select all images with street lights",
     images: [
-      "img1.png","img2.png","img3.png",
-      "img4.png","img5.png","img6.png",
-      "img7.png","img8.png","img9.png"
+      "https://camcookie876.github.io/gate/images/1/img1.png",
+      "https://camcookie876.github.io/gate/images/1/img2.png",
+      "https://camcookie876.github.io/gate/images/1/img3.png",
+      "https://camcookie876.github.io/gate/images/1/img4.png",
+      "https://camcookie876.github.io/gate/images/1/img5.png",
+      "https://camcookie876.github.io/gate/images/1/img6.png",
+      "https://camcookie876.github.io/gate/images/1/img7.png",
+      "https://camcookie876.github.io/gate/images/1/img8.png",
+      "https://camcookie876.github.io/gate/images/1/img9.png"
     ],
-    correctHash: "SHA256_HASH_OF_CORRECT_INDICES"
+    correctHash: "d0b6094bba2355ea2b52825b058feb9c57886138310a58f9edabbde38a4f7898"
   }
+  // Add more challenges with different prompts/images/hashes
 ];
 
 // --- Utility Functions ---
@@ -57,17 +64,19 @@ async function renderGate() {
   container.style.textAlign = "center";
   container.style.marginTop = "40px";
 
-  const logo = document.createElement("img");
-  logo.src = "https://your-logo-url.png";
-  logo.style.maxWidth = "150px";
-  container.appendChild(logo);
+  // Instruction prompt
+  const instruction = document.createElement("h3");
+  instruction.textContent = challenges[currentChallenge].prompt;
+  instruction.style.marginBottom = "15px";
+  container.appendChild(instruction);
 
+  // Grid
   const grid = document.createElement("div");
   grid.style.display = "grid";
   grid.style.gridTemplateColumns = "repeat(3, 100px)";
   grid.style.gap = "5px";
   grid.style.justifyContent = "center";
-  grid.style.marginTop = "20px";
+  grid.style.marginTop = "10px";
 
   const selected = new Set();
 
@@ -92,8 +101,9 @@ async function renderGate() {
 
   container.appendChild(grid);
 
+  // Submit button
   const button = document.createElement("button");
-  button.textContent = "Submit";
+  button.textContent = "Verify";
   button.style.marginTop = "15px";
   button.style.padding = "8px 16px";
   button.style.background = "#007BFF";
