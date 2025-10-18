@@ -82,63 +82,145 @@ async function validateToken() {
 let streak = 0
 
 function injectStyles() {
-  if (document.getElementById("gate-styles")) return
+  if (document.getElementById("camcookie-gate-styles")) return
   const style = document.createElement("style")
-  style.id = "gate-styles"
+  style.id = "camcookie-gate-styles"
   style.textContent = `
-    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-    @keyframes fadeOut { from {opacity:1;} to {opacity:0;} }
-    .gate-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#111;
-      display:flex; justify-content:center; align-items:center; z-index:99999; animation:fadeIn 0.4s ease; }
-    .gate-card { background:#fff; padding:20px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.4);
-      text-align:center; font-family:Arial,sans-serif; width:380px; }
-    .gate-title { font-size:15px; margin-bottom:12px; font-weight:bold; color:#202124; }
-    .gate-grid { display:grid; grid-template-columns:repeat(3, 100px); gap:6px; justify-content:center; }
-    .gate-tile { position:relative; }
-    .gate-img { width:100px; height:100px; border:2px solid #ccc; border-radius:4px; cursor:pointer;
-      transition:transform 0.2s, border-color 0.2s; }
-    .gate-img:hover { transform:scale(1.05); }
-    .gate-img.selected { border-color:#4CAF50; }
-    .gate-label { position:absolute; top:4px; left:6px; font-size:12px; background:rgba(0,0,0,0.5);
-      color:#fff; padding:2px 4px; border-radius:2px; }
-    .gate-btn { margin-top:14px; padding:8px 20px; background:#4285F4; color:#fff; border:none;
-      border-radius:4px; cursor:pointer; font-size:14px; }
-    .gate-btn:hover { background:#3367D6; }
-    .gate-feedback { margin-top:10px; font-size:13px; min-height:18px; color:#333; }
+    @keyframes gateFadeIn { from {opacity:0; transform:scale(0.98);} to {opacity:1; transform:scale(1);} }
+    @keyframes gateFadeOut { from {opacity:1;} to {opacity:0;} }
+    @keyframes sweepGlow { 0% {box-shadow:0 0 0 rgba(0,0,0,0);} 50% {box-shadow:0 0 40px rgba(66,133,244,0.6);} 100% {box-shadow:0 0 0 rgba(0,0,0,0);} }
+    .gate-overlay {
+      position:fixed; inset:0; z-index:2147483647;
+      background:linear-gradient(135deg, #0c0f14 0%, #12151e 100%);
+      backdrop-filter: blur(2px);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .gate-card {
+      width:420px; max-width:90vw;
+      background:#0f1320;
+      border:3px solid #3a7afe;
+      border-radius:14px;
+      box-shadow:0 30px 70px rgba(58,122,254,0.35), inset 0 0 20px rgba(58,122,254,0.25);
+      color:#e8eefc;
+      font-family:Inter, Arial, sans-serif;
+      padding:22px 22px 18px;
+      animation:gateFadeIn 280ms ease, sweepGlow 2.2s ease infinite;
+    }
+    .gate-header {
+      display:flex; align-items:center; justify-content:flex-start; gap:10px; margin-bottom:12px;
+    }
+    .gate-title {
+      font-size:16px; font-weight:800; letter-spacing:0.2px; color:#cfe2ff;
+      text-shadow:0 0 8px rgba(58,122,254,0.45);
+    }
+    .gate-svg {
+      width:28px; height:28px; flex:0 0 28px;
+      filter: drop-shadow(0 0 6px rgba(58,122,254,0.5));
+    }
+    .gate-grid {
+      display:grid; grid-template-columns:repeat(3, 110px); gap:10px; justify-content:center; margin-top:8px;
+    }
+    .gate-tile {
+      position:relative; width:110px; height:110px; border-radius:8px; overflow:hidden;
+      border:2px solid #2b3a67; background:#0b1020;
+      transition:border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+      box-shadow:0 10px 25px rgba(0,0,0,0.35);
+    }
+    .gate-tile:hover { transform:translateY(-2px) scale(1.03); box-shadow:0 18px 38px rgba(0,0,0,0.5); }
+    .gate-img { width:100%; height:100%; object-fit:cover; display:block; }
+    .gate-label {
+      position:absolute; top:6px; left:8px;
+      font-size:12px; font-weight:700; color:#e8eefc;
+      background:linear-gradient(180deg, rgba(16,22,38,0.85), rgba(16,22,38,0.55));
+      border:1px solid #334a87; border-radius:4px; padding:2px 6px;
+      box-shadow:0 0 6px rgba(58,122,254,0.4);
+    }
+    .gate-selected { border-color:#4bd6ff; box-shadow:0 0 0 2px rgba(75,214,255,0.4), 0 12px 30px rgba(75,214,255,0.25); }
+    .gate-actions { display:flex; align-items:center; justify-content:space-between; margin-top:14px; }
+    .gate-verify {
+      appearance:none; border:none; border-radius:10px;
+      background:linear-gradient(180deg, #3a7afe 0%, #2e6ae0 100%);
+      color:#fff; font-weight:800; letter-spacing:0.3px;
+      padding:10px 18px; cursor:pointer; font-size:14px;
+      box-shadow:0 12px 30px rgba(58,122,254,0.45), inset 0 -2px 0 rgba(0,0,0,0.25);
+      transition:transform 140ms ease, box-shadow 140ms ease;
+    }
+    .gate-verify:hover { transform:translateY(-1px); box-shadow:0 14px 34px rgba(58,122,254,0.55), inset 0 -2px 0 rgba(0,0,0,0.25); }
+    .gate-verify:active { transform:translateY(0); box-shadow:0 10px 26px rgba(58,122,254,0.45); }
+    .gate-feedback { font-size:13px; font-weight:700; color:#9cc4ff; text-shadow:0 0 6px rgba(58,122,254,0.35); }
+    .gate-badge { display:flex; align-items:center; gap:8px; color:#8aa9e6; font-size:11px; }
+    .gate-hidden { animation:gateFadeOut 420ms ease forwards; }
   `
   document.head.appendChild(style)
 }
 
-function renderGate() {
+function makeIconSVG(type = "shield") {
+  if (type === "shield") {
+    const svg = `
+      <svg class="gate-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+            <stop stop-color="#3a7afe" offset="0"/>
+            <stop stop-color="#4bd6ff" offset="1"/>
+          </linearGradient>
+        </defs>
+        <path d="M12 2l7 3v6c0 5.25-3.44 8.9-7 11-3.56-2.1-7-5.75-7-11V5l7-3z" fill="url(#g1)" stroke="#2e6ae0" stroke-width="1.2"/>
+        <path d="M9 12l2 2 4-4" fill="none" stroke="#e8eefc" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`
+    const span = document.createElement("span")
+    span.innerHTML = svg
+    return span.firstChild
+  }
+  const svg = `
+    <svg class="gate-svg" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="6" y="10" width="20" height="12" rx="3" fill="#3a7afe" opacity="0.3"/>
+      <circle cx="16" cy="16" r="5" fill="#4bd6ff"/>
+      <rect x="10" y="8" width="12" height="3" rx="1.5" fill="#2e6ae0"/>
+    </svg>`
+  const span = document.createElement("span")
+  span.innerHTML = svg
+  return span.firstChild
+}
+
+function renderOverlay() {
   injectStyles()
   const overlay = document.createElement("div")
   overlay.className = "gate-overlay"
+
   const card = document.createElement("div")
   card.className = "gate-card"
-  const challenge = challenges[Math.floor(Math.random() * challenges.length)]
+
+  const header = document.createElement("div")
+  header.className = "gate-header"
+  header.appendChild(makeIconSVG("shield"))
   const title = document.createElement("div")
   title.className = "gate-title"
+  const challenge = challenges[Math.floor(Math.random() * challenges.length)]
   title.textContent = challenge.prompt
-  card.appendChild(title)
+  header.appendChild(title)
+  card.appendChild(header)
+
   const grid = document.createElement("div")
   grid.className = "gate-grid"
   const selected = new Set()
+
   challenge.images.forEach((src, idx) => {
     const tile = document.createElement("div")
     tile.className = "gate-tile"
     const img = document.createElement("img")
     img.src = src
     img.className = "gate-img"
+    img.alt = `Tile ${idx + 1}`
     const label = document.createElement("div")
     label.className = "gate-label"
     label.textContent = idx + 1
     img.addEventListener("click", () => {
       if (selected.has(idx)) {
         selected.delete(idx)
-        img.classList.remove("selected")
+        tile.classList.remove("gate-selected")
       } else {
         selected.add(idx)
-        img.classList.add("selected")
+        tile.classList.add("gate-selected")
       }
     })
     tile.appendChild(img)
@@ -146,29 +228,42 @@ function renderGate() {
     grid.appendChild(tile)
   })
   card.appendChild(grid)
-  const btn = document.createElement("button")
-  btn.className = "gate-btn"
-  btn.textContent = "Verify"
-  card.appendChild(btn)
+
+  const actions = document.createElement("div")
+  actions.className = "gate-actions"
+  const badge = document.createElement("div")
+  badge.className = "gate-badge"
+  badge.appendChild(makeIconSVG("chip"))
+  badge.appendChild(document.createTextNode("Protected by Camcookie Gate"))
+  const verify = document.createElement("button")
+  verify.className = "gate-verify"
+  verify.textContent = "Verify"
+  actions.appendChild(badge)
+  actions.appendChild(verify)
+  card.appendChild(actions)
+
   const feedback = document.createElement("div")
   feedback.className = "gate-feedback"
   card.appendChild(feedback)
-  btn.addEventListener("click", async () => {
+
+  verify.addEventListener("click", async () => {
     const indices = Array.from(selected).sort().join(",")
     const hash = await sha256(indices)
     if (hash === challenge.correctHash) {
       streak++
-      feedback.textContent = `Correct. Streak ${streak}/${STREAK_REQUIRED}`
+      feedback.textContent = `Correct (${streak}/${STREAK_REQUIRED})`
       if (streak >= STREAK_REQUIRED) {
         try { await issueToken() } catch { feedback.textContent = "Error issuing token." }
       } else {
-        setTimeout(() => { overlay.remove(); renderGate() }, 600)
+        overlay.classList.add("gate-hidden")
+        setTimeout(() => { overlay.remove(); renderOverlay() }, 400)
       }
     } else {
       streak = 0
       feedback.textContent = "Incorrect. Try again."
     }
   })
+
   overlay.appendChild(card)
   document.body.appendChild(overlay)
 }
@@ -176,14 +271,16 @@ function renderGate() {
 function closeOverlay() {
   const overlay = document.querySelector(".gate-overlay")
   if (overlay) {
-    overlay.style.animation = "fadeOut 0.6s ease forwards"
-    setTimeout(() => overlay.remove(), 600)
+    overlay.classList.add("gate-hidden")
+    setTimeout(() => overlay.remove(), 420)
   }
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     const valid = await validateToken()
-    if (!valid) renderGate()
-  } catch { renderGate() }
+    if (!valid) renderOverlay()
+  } catch {
+    renderOverlay()
+  }
 })
