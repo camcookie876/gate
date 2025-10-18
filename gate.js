@@ -35,10 +35,7 @@ async function sbFetch(path, { method = "GET", body, headers = {} } = {}) {
     },
     body: body ? JSON.stringify(body) : undefined
   })
-  if (!res.ok) {
-    const txt = await res.text()
-    throw new Error(`Supabase error: ${res.status} ${txt}`)
-  }
+  if (!res.ok) throw new Error(await res.text())
   return res.json()
 }
 
@@ -92,7 +89,7 @@ function injectStyles() {
     @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
     @keyframes fadeOut { from {opacity:1;} to {opacity:0;} }
     .gate-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#111;
-      display:flex; justify-content:center; align-items:center; z-index:9999; animation:fadeIn 0.4s ease; }
+      display:flex; justify-content:center; align-items:center; z-index:99999; animation:fadeIn 0.4s ease; }
     .gate-card { background:#fff; padding:20px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.4);
       text-align:center; font-family:Arial,sans-serif; width:380px; }
     .gate-title { font-size:15px; margin-bottom:12px; font-weight:bold; color:#202124; }
